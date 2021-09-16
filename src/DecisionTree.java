@@ -74,7 +74,6 @@ public class DecisionTree {
 	}
 	
 	public void populate(Node current) {
-		
 		if(current.isLeaf() || current.IG == 0) 
 			return;
 		
@@ -164,7 +163,7 @@ public class DecisionTree {
 	public void traverse(Node current, int level) {
 		if(current == null)
 			return;
-
+		
 		System.out.println("LEVEL: " + level);
 		current.print();
 		traverse(current.left, level + 1);

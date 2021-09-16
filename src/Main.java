@@ -6,7 +6,7 @@ public class Main {
 
 	public static void main(String[] args) throws FileNotFoundException {
 		// TODO Auto-generated method stub
-		File file = new File("/Users/feiyansu/Desktop/train1.txt");
+		File file = new File("/Users/feiyansu/Desktop/train4.txt");
 		HashMap<String, List<Integer>> data = new HashMap<>();
 		
 		Node root = new Node();
