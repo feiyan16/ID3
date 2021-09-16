@@ -1,13 +1,14 @@
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.*;
 
 public class Main {
 
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		File file = new File("/Users/feiyansu/Desktop/train4.txt");
-		HashMap<String, List<Integer>> data = new HashMap<>();
+		final String trainingPath = "/Users/feiyansu/Desktop/test.txt";
+//		final String testPath = "/Users/feiyansu/Desktop/4375/HW1/test.dat";
+		FileInputStream file = new FileInputStream(trainingPath);
+//		HashMap<String, List<Integer>> testData = new HashMap<>();
 		
 		Node root = new Node();
 		readFile(file, root.data);
@@ -15,25 +16,38 @@ public class Main {
 		tree.print();
 	}
 
-	public static void readFile(File file, HashMap<String, List<Integer>> data)
-			throws FileNotFoundException {
-		Scanner scan = new Scanner(file);
-		String headStr = scan.nextLine();
+	public static void readFile(FileInputStream file, HashMap<String, List<Integer>> data)
+			throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(file));
+		
+		String headStr = reader.readLine();
 		String[] headers = headStr.split("\t");
 		
 		// initializes empty arrays for each header's values
 		for(int i = 0; i < headers.length; i++) 
 			data.put(headers[i], new ArrayList<>());
 		
-		while(scan.hasNextLine()) {
-			String line = scan.nextLine();
+		String line = reader.readLine();
+		while(line != null) {
+			
+			if(line.isBlank() || line.isEmpty()) {
+				line = reader.readLine();
+				continue;
+			}
+			
 			String[] values = line.split("\t");
 			
 			for(int i = 0; i < headers.length; i++) {
-				int value = Integer.valueOf(values[i]);
-				data.get(headers[i]).add(value);
+				
+				if(!(values[i].isBlank() && values[i].isEmpty())) {
+					int value = Integer.valueOf(values[i]);
+					data.get(headers[i]).add(value);
+				}
 			}
+			
+			line = reader.readLine();
 		}
-		scan.close();
+		
+		reader.close();
 	}
 }

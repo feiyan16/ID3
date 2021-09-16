@@ -11,7 +11,7 @@ class Node {
 	
 	String attribute = "";
 	
-	int branch = -1;
+	int branch = -1, clss = -1;
 	
 	Node left, mid, right; // 0, 1, 2 branch
 	
@@ -45,10 +45,8 @@ class Node {
 	}
 
 	void print() {
-		System.out.printf("------------------------------------\n"
-				+ "|B%d | 0: %d | 1: %d | 2: %d | H: %.2f|\n"
-				+ "------------------------------------\n", 
-				branch, (int)ct0, (int)ct1, (int)ct2, H);
+		System.out.printf("%s = %d : ", attribute, branch);
+		System.out.print(clss == -1 ? "\n" : clss + "\n");
 	}
 }
 
@@ -74,8 +72,16 @@ public class DecisionTree {
 	}
 	
 	public void populate(Node current) {
-		if(current.isLeaf() || current.IG == 0) 
+		if(current.isLeaf() || current.IG == 0) {
+			int max = (int) Math.max(Math.max(current.ct0, current.ct1), current.ct2);
+			if(current.ct0 == max)
+				current.clss = 0;
+			else if (current.ct1 == max)
+				current.clss = 1;
+			else 
+				current.clss = 2;
 			return;
+		}
 		
 		String attribute = chooseAttribute(current);
 		Node[] nodes = partition(attribute, current);
@@ -164,8 +170,13 @@ public class DecisionTree {
 		if(current == null)
 			return;
 		
-		System.out.println("LEVEL: " + level);
-		current.print();
+		if(level > 0) {
+			if (level > 1)
+				for(int i = 0; i < level; i++) 
+					System.out.print("|  ");
+
+			current.print();
+		} 
 		traverse(current.left, level + 1);
 		traverse(current.mid, level + 1);
 		traverse(current.right, level + 1);
