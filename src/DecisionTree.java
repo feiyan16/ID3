@@ -11,15 +11,16 @@ class Node {
 	
 	String attribute = "";
 	
-	int branch = -1, clss = -1;
+	// which branch it came from and 
+	// if leaf node, what class is it
+	int branch = -1, clss = -1; 
 	
-	Node left, mid, right; // 0, 1, 2 branch
+	Node left, mid, right; // 0, 1, 2 child
 	
-	Node(){}
-
 	void init() {
 		this.tot = ct0 + ct1 + ct2;
 		this.H = entropy();
+		
 	}
 	
 	boolean isLeaf() {
@@ -54,9 +55,11 @@ public class DecisionTree {
 	
 	Node root;
 	double currentIG = -1;
+	String[] attributes; // keeps order of attributes L - R
 	
-	public DecisionTree(Node root) {
+	public DecisionTree(Node root, String[] attributes) {
 		this.root = root;
+		this.attributes = attributes;
 		init();
 		populate(root);
 	}
@@ -72,14 +75,17 @@ public class DecisionTree {
 	}
 	
 	public void populate(Node current) {
+		
 		if(current.isLeaf() || current.IG == 0) {
-			int max = (int) Math.max(Math.max(current.ct0, current.ct1), current.ct2);
-			if(current.ct0 == max)
-				current.clss = 0;
-			else if (current.ct1 == max)
-				current.clss = 1;
-			else 
-				current.clss = 2;
+			// leaf that either has H = 0, 
+			// or has examples that belong to different classes
+			if(current.tot > 0) {
+				int max = (int) Math.max(Math.max(current.ct0, current.ct1), current.ct2);
+				current.clss = current.ct0 == max ? 0 : current.ct1 == max ? 1 : 2;
+			} else { // leaf that has no examples left
+				int max = (int) Math.max(Math.max(root.ct0, root.ct1), root.ct2);
+				current.clss = (root.ct0 == max ? 0 : root.ct1 == max ? 1 : 2);
+			}
 			return;
 		}
 		
@@ -89,11 +95,10 @@ public class DecisionTree {
 		for(Node n : nodes) {
 			n.attribute = attribute;
 			n.IG = currentIG;
+			if(n.branch == 0) current.left = n;
+			else if (n.branch == 1) current.mid = n;
+			else current.right = n;
 		}
-
-		current.left = nodes[0];
-		current.mid = nodes[1];
-		current.right = nodes[2];
 		
 		populate(current.left);
 		populate(current.mid);
@@ -101,26 +106,30 @@ public class DecisionTree {
 	}
 	
 	public String chooseAttribute(Node current) {
-		
-		// Data table in current node
-		HashMap<String, List<Integer>> data = current.data;
 		// maps IG to attribute
 		HashMap<Double, String> map = new HashMap<>();
 		double MAX_IG = 0;
 		
-		for(String key : data.keySet()) {
+		for(String key : attributes) {
 			if(key.compareTo("class") == 0 || key.compareTo(current.attribute) == 0) 
 				continue;
 			
 			Node[] nodes = partition(key, current);
+			
+			// sum up conditional entropies
+			double condH = 0;
+			for(Node n : nodes) 
+				condH += n.H * (n.tot/current.tot);
 			// calculate IG
-			double IG = current.H - (
-					nodes[0].H * (nodes[0].tot/current.tot) + // left, 0 node
-					nodes[1].H * (nodes[1].tot/current.tot) + // mid, 1 node
-					nodes[2].H * (nodes[2].tot/current.tot)); // right, 2 node
+			double IG = current.H - condH;
 			
 			MAX_IG = Math.max(MAX_IG, IG);
-			map.put(IG, key);
+			
+			// only put into map if it's a unique IG
+			// if it's repeated, so map alr contains IG don't put, 
+			// it'll end up replacing the attribute that's already there
+			if(!map.containsKey(IG)) 
+				map.put(IG, key);
 		}
 		// return attribute with the max IG
 		currentIG = MAX_IG;
