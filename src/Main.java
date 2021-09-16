@@ -17,7 +17,7 @@ public class Main {
 		// create tree
 		DecisionTree tree = new DecisionTree(root, attributes);
 		// print tree
-		tree.print();
+//		tree.print();
 		
 		// read store data from files for testing
 		HashMap<String, List<Integer>> testData = new HashMap<>();

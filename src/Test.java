@@ -30,6 +30,8 @@ public class Test {
 				int branch = data.get(att).get(i);
 				current = branch == 0 ? current.left : branch == 1 ? current.mid : current.right;
 			}
+			
+			calculated.add(i, current.clss);
 		}
 	}
 	
