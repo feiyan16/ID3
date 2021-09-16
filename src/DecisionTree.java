@@ -48,6 +48,8 @@ class Node {
 	void print() {
 		System.out.printf("%s = %d : ", attribute, branch);
 		System.out.print(clss == -1 ? "\n" : clss + "\n");
+//		System.out.printf("IG: %.2f\n", IG);
+//		System.out.printf("0: %d, 1: %d, 2: %d\n", (int)ct0, (int)ct1, (int)ct2);
 	}
 }
 
@@ -76,33 +78,39 @@ public class DecisionTree {
 	
 	public void populate(Node current) {
 		
-		if(current.isLeaf() || current.IG == 0) {
+		if(current.isLeaf()) {
+			int max = (int) Math.max(Math.max(current.ct0, current.ct1), current.ct2);
+			current.clss = current.ct0 == max ? 0 : current.ct1 == max ? 1 : 2;
+			return;
+		} 
+		
+		String attribute = chooseAttribute(current);
+		Node[] nodes = partition(attribute, current);
+			
+		if(currentIG > 0) {	
+			for(Node n : nodes) {
+				n.attribute = attribute;
+				n.IG = currentIG;
+				if(n.branch == 0) current.left = n;
+				else if (n.branch == 1) current.mid = n;
+				else current.right = n;
+			}
+			
+			populate(current.left);
+			populate(current.mid);
+			populate(current.right);
+		} else {
 			// leaf that either has H = 0, 
 			// or has examples that belong to different classes
 			if(current.tot > 0) {
 				int max = (int) Math.max(Math.max(current.ct0, current.ct1), current.ct2);
 				current.clss = current.ct0 == max ? 0 : current.ct1 == max ? 1 : 2;
-			} else { // leaf that has no examples left
+			} else { // leaf has no examples left to split with
 				int max = (int) Math.max(Math.max(root.ct0, root.ct1), root.ct2);
 				current.clss = (root.ct0 == max ? 0 : root.ct1 == max ? 1 : 2);
 			}
-			return;
 		}
 		
-		String attribute = chooseAttribute(current);
-		Node[] nodes = partition(attribute, current);
-		
-		for(Node n : nodes) {
-			n.attribute = attribute;
-			n.IG = currentIG;
-			if(n.branch == 0) current.left = n;
-			else if (n.branch == 1) current.mid = n;
-			else current.right = n;
-		}
-		
-		populate(current.left);
-		populate(current.mid);
-		populate(current.right);
 	}
 	
 	public String chooseAttribute(Node current) {
@@ -181,8 +189,8 @@ public class DecisionTree {
 		
 		if(level > 0) {
 			if (level > 1)
-				for(int i = 0; i < level; i++) 
-					System.out.print("|  ");
+				for(int i = 0; i < level-1; i++) 
+					System.out.print("| ");
 
 			current.print();
 		} 

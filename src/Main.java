@@ -17,7 +17,8 @@ public class Main {
 		// create tree
 		DecisionTree tree = new DecisionTree(root, attributes);
 		// print tree
-//		tree.print();
+		tree.print();
+		System.out.println();
 		
 		// read store data from files for testing
 		HashMap<String, List<Integer>> testData = new HashMap<>();
@@ -25,10 +26,10 @@ public class Main {
 		for(String key : root.data.keySet()) trainingData.put(key, root.data.get(key));
 		readFile(testFile, testData);
 		
-		Test testTraining = new Test(tree, trainingData);
+		Test testTraining = new Test(tree, trainingData, "training");
 		testTraining.runTest();
 		
-		Test testTest = new Test(tree, testData);
+		Test testTest = new Test(tree, testData, "test");
 		testTest.runTest();
 		
 	}
